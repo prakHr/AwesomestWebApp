@@ -3,7 +3,10 @@ from typing import Callable
 
 import flet as ft
 import runShorAlgoForEvenNo as r
+from collections import Counter
+import flet_charts as fch
 
+import time
 
 @ft.control
 class Task(ft.Column):
@@ -200,16 +203,188 @@ class TodoApp(ft.Column):
         self.update()
 
 
+@ft.control
+class AnalyticsPage(ft.Column):
+
+    def create_shimmer(self):
+        print("Creating shimmer effect...")
+        accent = ft.LinearGradient(
+            begin=ft.Alignment(-1.0, -0.5),
+            end=ft.Alignment(1.0, 0.5),
+            colors=[
+                ft.Colors.BLUE,
+                ft.Colors.BLUE,
+                ft.Colors.WHITE,
+                ft.Colors.BLUE,
+                ft.Colors.BLUE,
+            ],
+            stops=[0.0, 0.35, 0.5, 0.65, 1.0],
+        )
+
+        return ft.Shimmer(
+            gradient=accent,
+            direction=ft.ShimmerDirection.LTR,
+            period=1800,
+            content=ft.Container(
+                width=300,
+                height=300,
+                border_radius=150,
+                bgcolor=ft.Colors.with_opacity(
+                    0.3,
+                    ft.Colors.WHITE,
+                ),
+            )
+        )
+
+    def init(self):
+
+        self.input_numbers = ft.TextField(
+            label="Comma separated integers",
+            hint_text="10,20,30,40",
+        )
+
+        self.chart_container = ft.Container()
+
+        self.controls = [
+            ft.Text(
+                "Create Pie Chart - Analytics Dashboard",
+                size=24,
+                weight=ft.FontWeight.BOLD,
+            ),
+            self.input_numbers,
+            ft.Button(
+                "Generate Pie Chart",
+                on_click=self.generate_chart,
+            ),
+            self.chart_container,
+        ]
+
+    def generate_chart(self, e):
+
+        self.chart_container.content = self.create_shimmer()
+        
+        self.update()
+        self.page.run_thread(self.build_chart)
+
+    def build_chart(self):
+        time.sleep(2)  # Simulate data processing delay
+        try:
+            values = [
+                int(x.strip())
+                for x in self.input_numbers.value.split(",")
+                if x.strip()
+            ]
+
+            colors = [
+                ft.Colors.BLUE,
+                ft.Colors.RED,
+                ft.Colors.GREEN,
+                ft.Colors.ORANGE,
+                ft.Colors.PURPLE,
+                ft.Colors.CYAN,
+            ]
+            counts = Counter(values)
+            total = sum(counts.values())
+            sections = []
+            for i, (number, count) in enumerate(counts.items()):
+
+                percentage = round((count / total) * 100, 2)
+
+                sections.append(
+                    fch.PieChartSection(
+                        value=count,
+                        title=f"{number} ({percentage}%)",
+                        color=colors[i % len(colors)],
+                        radius=100,
+                    )
+                )
+            chart = fch.PieChart(
+                sections=sections,
+                expand=True,
+            )
+
+            self.chart_container.content = chart
+            self.update()
+
+        except Exception as ex:
+            print(ex)
+
+
+
+@ft.control
+class MultiPageApp(ft.Column):
+
+    def theme_changed(self, e):
+
+        if e.control.value:
+            self.page.theme_mode = ft.ThemeMode.DARK
+        else:
+            self.page.theme_mode = ft.ThemeMode.LIGHT
+
+        self.page.update()
+
+    def init(self):
+
+        self.todo_page = TodoApp()
+        self.analytics_page = AnalyticsPage()
+
+        self.page_body = ft.Container(
+            content=self.todo_page,
+            expand=True,
+        )
+
+        self.navbar = ft.CupertinoNavigationBar(
+            destinations=[
+                ft.NavigationBarDestination(
+                    icon=ft.Icons.CHECKLIST,
+                    label="Todo",
+                ),
+                ft.NavigationBarDestination(
+                    icon=ft.Icons.ANALYTICS,
+                    label="Analytics",
+                ),
+            ],
+            on_change=self.nav_changed,
+        )
+
+        self.theme_switch = ft.Switch(
+            label="Dark Mode",
+            value=False,
+            on_change=self.theme_changed,
+        )
+
+        self.controls = [
+            ft.Row(
+                alignment=ft.MainAxisAlignment.END,
+                controls=[
+                    self.theme_switch,
+                ],
+            ),
+            self.page_body,
+        ]
+
+
+    def did_mount(self):
+        self.page.navigation_bar = self.navbar
+        self.page.update()
+
+    def nav_changed(self, e):
+
+        if e.control.selected_index == 0:
+            self.page_body.content = self.todo_page
+
+        else:
+            self.page_body.content = self.analytics_page
+
+        self.update()
+
 def main(page: ft.Page):
-    page.title = (
-        "Integer Prime Factorization Shor Algorithm App"
-    )
+    page.title = "Integer Prime Factorization Shor Algorithm App"
+    page.theme_mode = ft.ThemeMode.LIGHT
 
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-    app = TodoApp()
-
-    page.add(app)
+    page.add(MultiPageApp())
 
 
 if __name__ == "__main__":
