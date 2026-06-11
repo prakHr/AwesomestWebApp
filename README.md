@@ -1,2 +1,11 @@
 # PrimeFactorization-WebApp
-you can run it using flet run
+
+# Flet app
+
+A simple Flet app.
+
+To run the app:
+
+```
+flet run 
+```
