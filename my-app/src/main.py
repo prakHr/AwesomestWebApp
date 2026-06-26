@@ -21,6 +21,11 @@ from wordhoard import Synonyms
 
 import languagemodels as lm
 import time
+from datetime import datetime
+
+
+
+
 
 @ft.control
 class WikiPage(ft.Column):
@@ -28,7 +33,7 @@ class WikiPage(ft.Column):
     def init(self):
 
         self.search_field = ft.TextField(
-            label="Search",
+            label="Search for a topic...",
             hint_text="Enter a topic...",
             prefix_icon=ft.Icons.SEARCH,
             expand=True,
@@ -209,6 +214,11 @@ class TranslatorPage(ft.Column):
                 )
             )
 
+            now = datetime.now()
+
+            date_time_text = now.strftime("%Y-%m-%d %H:%M:%S %p")
+
+
             card = ft.Card(
                 elevation=10,
                 content=ft.Container(
@@ -216,13 +226,13 @@ class TranslatorPage(ft.Column):
                     content=ft.Column(
                         controls=[
                             ft.Container(
-                                height=100,
-                                width=300,
+                                height=200,
+                                width=1000,
                                 content=ft.Column(
                                     scroll=ft.ScrollMode.AUTO,
                                     controls=[
                                         ft.Text(
-                                            translator_text,
+                                            f"Here is the translated text:- {translator_text}\n\n\nBy the way today's date and time is:- {date_time_text}", 
                                             selectable=True,
                                         )
                                     ],
@@ -488,7 +498,7 @@ class AnalyticsPage(ft.Column):
 
         self.controls = [
             ft.Text(
-                "Create Pie Chart - Analytics Dashboard",
+                "Create Pie/Line Chart - Analytics Dashboard",
                 size=24,
                 weight=ft.FontWeight.BOLD,
             ),
