@@ -42,7 +42,7 @@ def create_agi(tasks, agi_name):
 
 
         # Recall after learning
-        results = brain.recall(task)
+        # results = brain.recall(task)
         # print(f"Recall: {results}")
 
 
