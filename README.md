@@ -32,6 +32,9 @@
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/23909813-8712-4362-bfeb-569b164b0172" />
 
+# AGI Screen
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/000891d7-9f26-49e1-9934-ab3bff7f429e" />
 
 # Flet app
 
