@@ -1266,8 +1266,7 @@ class AGIPage(ft.Column):
 
     async def get_ask_question_async2(self):
         self.response_container2.controls.clear()
-        print(f"Task here is :- {self.tasks}")
-
+        
         # Create one container for each response
         containers = [
             ft.Container(
