@@ -1134,7 +1134,7 @@ class SynonymPage(ft.Column):
 class AGIPage(ft.Column):
     def init(self):
         self.input_field = ft.TextField(
-            label="Ask me anything",
+            label="Load Conversations, self correct and Then ask me anything",
             hint_text="Type your question here...",
             expand=True,
         )
@@ -1149,8 +1149,17 @@ class AGIPage(ft.Column):
             on_click=self.ask_question,
         )
         
+        self.ask_button2 = ft.Button(
+            "Load Previous Conversations",
+            on_click=self.ask_question2,
+        )
 
         self.response_container = ft.Column(
+            scroll=ft.ScrollMode.AUTO,
+            expand=True,
+        )
+        
+        self.response_container2 = ft.Column(
             scroll=ft.ScrollMode.AUTO,
             expand=True,
         )
@@ -1161,9 +1170,11 @@ class AGIPage(ft.Column):
                     self.input_field,
                     self.submit_button,
                     self.ask_button,
+                    self.ask_button2
                 ]
             ),
             self.response_container,
+            self.response_container2 
         ]
 
         self.tasks = []
@@ -1183,33 +1194,52 @@ class AGIPage(ft.Column):
 
         self.submit_button.disabled = True
         self.ask_button.disabled = True
+        self.ask_button2.disabled = True
         self.response_container.controls.clear()
+        self.response_container2.controls.clear()
         self.update()
         self.page.run_task(self.get_response_async, question)
         self.submit_button.disabled = False
         self.ask_button.disabled = False
+        self.ask_button2.disabled = False
         self.input_field.value = ""
+
         
     def ask_question(self, e):
         question = self.input_field.value.strip()
 
         if not question:
             return
+
         self.submit_button.disabled = True
         self.ask_button.disabled = True
+        self.ask_button2.disabled = True
         self.response_container.controls.clear()
+        self.response_container2.controls.clear()
         self.update()
-        self.page.run_task(self.get_ask_question_async, question)
+        self.page.run_task(self.get_ask_question_async,question)
+        self.ask_button2.disabled = False
         self.ask_button.disabled = False
         self.submit_button.disabled = False
         self.input_field.value = ""
+
+    def ask_question2(self, e):
+        self.submit_button.disabled = True
+        self.ask_button.disabled = True
+        self.ask_button2.disabled = True
+        self.response_container.controls.clear()
+        self.update()
+        self.page.run_task(self.get_ask_question_async2)
+        self.ask_button2.disabled = False
+        self.ask_button.disabled = False
+        self.submit_button.disabled = False
+        self.input_field.value = ""
+
     
     async def get_response_async(self, question):
         self.tasks.append(question)
-        # from pprint import pprint
-        # pprint(self.tasks)
+        
     
-   
     async def get_ask_question_async(self, query):
         agi_system = create_agi(self.tasks, self.agi_name)
 
@@ -1233,6 +1263,27 @@ class AGIPage(ft.Column):
         self.response_container.controls.extend(containers)
 
         self.update()
+
+    async def get_ask_question_async2(self):
+        self.response_container2.controls.clear()
+        print(f"Task here is :- {self.tasks}")
+
+        # Create one container for each response
+        containers = [
+            ft.Container(
+                content=ft.Text(str(item)),
+                padding=10,
+                margin=5,
+                border_radius=10,
+                bgcolor=ft.Colors.GREEN_50,
+            )
+            for item in self.tasks
+        ]
+
+        self.response_container2.controls.extend(containers)
+
+        self.update()
+    
 
 @ft.control
 class MultiPageApp(ft.Column):
@@ -1277,7 +1328,7 @@ class MultiPageApp(ft.Column):
                 ),
                 ft.NavigationBarDestination(
                     icon=ft.Icons.SYNAGOGUE_ROUNDED,
-                    label="SynonymGenerator",
+                    label="AskSynonym",
                 ),
                 ft.NavigationBarDestination(
                     icon=ft.Icons.WIDGETS,
@@ -1296,18 +1347,18 @@ class MultiPageApp(ft.Column):
             on_change=self.nav_changed,
         )
 
-        self.theme_switch = ft.Switch(
-            label="Dark Mode",
-            value=False,
-            on_change=self.theme_changed,
-        )
+        # self.theme_switch = ft.Switch(
+        #     label="Dark Mode",
+        #     value=False,
+        #     on_change=self.theme_changed,
+        # )
 
         self.controls = [
             ft.Row(
                 alignment=ft.MainAxisAlignment.END,
-                controls=[
-                    self.theme_switch,
-                ],
+                # controls=[
+                #     self.theme_switch,
+                # ],
             ),
             self.page_body,
         ]
